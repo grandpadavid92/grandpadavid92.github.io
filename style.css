@@ -1,0 +1,553 @@
+/* ==========================================================================
+   DESIGN TOKENS — Direction B: Systems Architecture / Interface Diagram
+   ========================================================================== */
+:root {
+  --charcoal:    #14181C;
+  --charcoal-2:  #1B2027;
+  --charcoal-3:  #20262E;
+  --bone:        #E8E6DD;
+  --bone-70:     rgba(232, 230, 221, 0.68);
+  --bone-45:     rgba(232, 230, 221, 0.42);
+  --pine:        #4A6B5C;
+  --pine-bright: #6B9683;
+  --pine-dim:    rgba(74, 107, 92, 0.4);
+  --brass:       #D4A24C;
+  --brass-dim:   rgba(212, 162, 76, 0.16);
+  --warn:        #B0563F;
+  --line:        rgba(232, 230, 221, 0.12);
+  --line-strong: rgba(232, 230, 221, 0.22);
+
+  --display: "Space Grotesk", sans-serif;
+  --body:    "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --max: 1180px;
+  --spine-w: 56px;
+  --radius: 3px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--charcoal);
+  color: var(--bone);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--brass); color: var(--charcoal); }
+
+/* faint schematic grid on the page background */
+.gridfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.35;
+  mask-image: linear-gradient(to bottom, black, black, transparent);
+}
+
+/* ==========================================================================
+   Reveal-on-scroll
+   ========================================================================== */
+.reveal.pre-animate {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.pre-animate.in-view { opacity: 1; transform: translateY(0); }
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px clamp(20px, 5vw, 56px);
+  background: rgba(20, 24, 28, 0.86);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.mark {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.mark .dot { color: var(--brass); }
+.mark .id {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--bone-45);
+  letter-spacing: 0.06em;
+}
+
+.nav { display: flex; align-items: center; gap: 26px; }
+.nav a {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone-45);
+  position: relative;
+  padding: 4px 0 8px;
+  transition: color 0.2s ease;
+}
+.nav a::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--brass);
+  transform: translateX(-50%) scale(0);
+  transition: transform 0.2s ease;
+}
+.nav a:hover { color: var(--bone); }
+.nav a.active { color: var(--brass); }
+.nav a.active::before { transform: translateX(-50%) scale(1); }
+
+/* ==========================================================================
+   Spine + Track grid  (the signature block-diagram backbone)
+   ========================================================================== */
+main {
+  position: relative;
+  z-index: 1;
+  max-width: var(--max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: var(--spine-w) 1fr;
+}
+
+.spine {
+  position: relative;
+}
+.spine::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--pine-dim) 4%, var(--pine-dim) 96%, transparent);
+}
+
+.track {
+  min-width: 0;
+  padding: 0 clamp(18px, 4vw, 48px) 0 0;
+}
+
+/* a "block" is one section on the diagram, wired to the spine */
+.block {
+  position: relative;
+  padding: 64px 0;
+  border-bottom: 1px solid var(--line);
+}
+.block:last-of-type { border-bottom: none; }
+
+.block::before {
+  /* connector line running from the spine into the block */
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--spine-w) + (var(--spine-w) / 2));
+  top: 74px;
+  width: calc(var(--spine-w) / 2);
+  height: 1px;
+  background: var(--pine-bright);
+  opacity: 0.6;
+}
+.block::after {
+  /* port node where the connector meets the block */
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--spine-w) + (var(--spine-w) / 2) - 4px);
+  top: 70px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--charcoal);
+  border: 1.5px solid var(--brass);
+}
+
+.port-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass);
+  margin: 0 0 18px;
+}
+.port-label .idx { color: var(--bone-45); }
+
+.block h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  letter-spacing: -0.01em;
+  margin: 0 0 28px;
+  max-width: 20ch;
+}
+
+/* asymmetric offsets — alternate blocks sit at different widths/indents */
+.block--wide  { max-width: 100%; }
+.block--right { margin-left: clamp(0px, 8vw, 120px); max-width: 640px; }
+.block--tight { max-width: 560px; }
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+.hero {
+  padding: clamp(56px, 12vh, 120px) 0 48px;
+  border-bottom: 1px solid var(--line);
+}
+.hero::before, .hero::after { content: none; }
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  color: var(--pine-bright);
+  border: 1px solid var(--pine-dim);
+  background: rgba(74, 107, 92, 0.08);
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin: 0 0 28px;
+}
+.status-chip .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--pine-bright);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.hero-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 24px;
+  max-width: 16ch;
+}
+.hero-title .accent { color: var(--brass); }
+
+.hero-sub {
+  font-size: clamp(1rem, 1.5vw, 1.14rem);
+  color: var(--bone-70);
+  max-width: 54ch;
+  margin: 0 0 36px;
+}
+
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 44px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary { background: var(--brass); color: var(--charcoal); border-color: var(--brass); font-weight: 600; }
+.btn-primary:hover { background: #E3B25E; }
+.btn-ghost { background: transparent; color: var(--bone); }
+.btn-ghost:hover { border-color: var(--pine-bright); color: var(--pine-bright); }
+
+/* legend row — a mini diagram key, doubles as quick links */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.legend-item {
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px 16px 0;
+  border-right: 1px solid var(--line);
+}
+.legend-item:last-child { border-right: none; }
+.legend-item .k {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bone-45);
+}
+.legend-item .v { font-size: 0.94rem; color: var(--bone); }
+.legend-item a.v:hover { color: var(--brass); }
+
+/* ==========================================================================
+   About
+   ========================================================================== */
+.about-body { font-size: 1.02rem; color: var(--bone-70); max-width: 62ch; }
+.about-body p + p { margin-top: 16px; }
+
+.port-grid {
+  margin-top: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.port-grid li {
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.02em;
+  color: var(--bone-70);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  padding: 7px 12px;
+  position: relative;
+  padding-left: 20px;
+}
+.port-grid li::before {
+  content: "";
+  position: absolute;
+  left: 9px; top: 50%;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--pine-bright);
+  transform: translateY(-50%);
+}
+
+/* ==========================================================================
+   Mission — requirements framing (REQ-01, REQ-02...) + inline code-comment quote
+   ========================================================================== */
+.mission-statement {
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  line-height: 1.6;
+  color: var(--bone);
+  max-width: 60ch;
+  margin: 0 0 40px;
+}
+
+.req-list { list-style: none; padding: 0; margin: 0; max-width: 640px; }
+.req-list li {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.95rem;
+  color: var(--bone-70);
+}
+.req-list li:last-child { border-bottom: 1px solid var(--line); }
+.req-list .req-id {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--brass);
+  padding-top: 2px;
+}
+
+.mission-quote {
+  margin-top: 44px;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--pine-bright);
+  max-width: 62ch;
+  line-height: 1.7;
+}
+.mission-quote .cmt { color: var(--bone-45); }
+
+/* ==========================================================================
+   Off the clock — staggered subsystem rail
+   ========================================================================== */
+.hobbies-intro { font-size: 1.02rem; color: var(--bone-70); max-width: 60ch; margin: 0 0 40px; }
+
+.subsystem-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bone-45);
+  margin: 0 0 16px;
+}
+.subsystem-label:not(:first-of-type) { margin-top: 40px; }
+
+.rail {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 8px 4px 20px;
+  scroll-snap-type: x proximity;
+}
+.rail::-webkit-scrollbar { height: 6px; }
+.rail::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 4px; }
+
+.subcard {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: min(300px, 78vw);
+  background: var(--charcoal-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.subcard:hover { transform: translateY(-4px); border-color: var(--pine-dim); }
+/* stagger: alternating cards sit slightly lower, echoing a signal trace */
+.rail .subcard:nth-child(even) { margin-top: 22px; }
+
+.subcard-photo { aspect-ratio: 4 / 3; overflow: hidden; }
+.subcard-photo img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.4s ease;
+}
+.subcard:hover .subcard-photo img { transform: scale(1.05); }
+
+.subcard-body { padding: 18px 20px 20px; }
+.subcard-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em;
+  color: var(--bone-45); text-transform: uppercase;
+}
+.subcard-top .stat { color: var(--pine-bright); }
+.subcard h3 {
+  font-family: var(--display); font-weight: 600; font-size: 1.12rem; margin: 0 0 8px;
+}
+.subcard p { font-size: 0.88rem; color: var(--bone-70); margin: 0; }
+
+.subcard--placeholder { display: flex; align-items: center; justify-content: center; min-height: 160px; }
+.subcard--placeholder .subcard-body { text-align: center; color: var(--bone-45); font-family: var(--mono); font-size: 0.78rem; }
+
+/* ==========================================================================
+   Field notes — Systems & Stories log
+   ========================================================================== */
+.log-intro { font-size: 1.02rem; color: var(--bone-70); max-width: 60ch; margin: 0 0 36px; }
+
+.log-entry {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 28px;
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+}
+.log-entry:last-of-type { border-bottom: 1px solid var(--line); }
+
+.log-num {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--brass);
+  padding-top: 4px;
+}
+.log-num span { display: block; color: var(--bone-45); font-size: 0.7rem; margin-top: 4px; }
+
+.log-entry h3 {
+  font-family: var(--display); font-weight: 600; font-size: 1.24rem; margin: 0 0 10px;
+}
+.log-entry p { font-size: 0.94rem; color: var(--bone-70); max-width: 60ch; margin: 0 0 14px; }
+.log-link {
+  font-family: var(--mono); font-size: 0.78rem; color: var(--pine-bright);
+  border-bottom: 1px solid var(--pine-dim); padding-bottom: 2px;
+}
+.log-link:hover { color: var(--brass); border-color: var(--brass); }
+
+.log-cta {
+  margin-top: 8px;
+  padding: 22px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.log-cta p { margin: 0; font-size: 0.92rem; color: var(--bone-70); }
+.log-cta .k { font-family: var(--mono); font-size: 0.72rem; color: var(--bone-45); letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+/* ==========================================================================
+   Contact
+   ========================================================================== */
+.contact-sub { color: var(--bone-70); max-width: 50ch; margin: 0 0 32px; font-size: 1.02rem; }
+
+.output-ports { display: flex; flex-wrap: wrap; gap: 14px; }
+.output-port {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  min-width: 220px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.output-port:hover { border-color: var(--brass); transform: translateY(-2px); }
+.output-port .k { font-family: var(--mono); font-size: 0.68rem; color: var(--bone-45); letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 3px; }
+.output-port .v { font-size: 0.96rem; color: var(--bone); }
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.site-footer {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 26px clamp(18px, 5vw, 56px) 56px;
+  padding-left: calc(var(--spine-w) + clamp(18px, 5vw, 56px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--bone-45);
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.site-footer a:hover { color: var(--brass); }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 760px) {
+  :root { --spine-w: 32px; }
+  .block--right { margin-left: 0; max-width: 100%; }
+  .nav { gap: 16px; }
+  .legend-item { flex: 1 1 45%; }
+  .log-entry, .req-list li { grid-template-columns: 44px 1fr; gap: 14px; }
+}
+
+@media (max-width: 520px) {
+  .nav a span.full { display: none; }
+  .status-bar-hint { display: none; }
+}
