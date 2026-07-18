@@ -351,6 +351,36 @@ main {
   transform: translateY(-50%);
 }
 
+/* Education — sits under About.Out, same subsystem-label pattern as Off the Clock */
+.edu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.edu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.edu-item:hover { border-color: var(--pine-bright); transform: translateY(-2px); }
+.edu-degree { font-size: 0.94rem; color: var(--bone); }
+.edu-meta {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--brass);
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    Mission — requirements framing (REQ-01, REQ-02...) + inline code-comment quote
    ========================================================================== */
@@ -545,6 +575,7 @@ main {
   .nav { gap: 16px; }
   .legend-item { flex: 1 1 45%; }
   .log-entry, .req-list li { grid-template-columns: 44px 1fr; gap: 14px; }
+  .edu-item { flex-wrap: wrap; }
 }
 
 @media (max-width: 520px) {

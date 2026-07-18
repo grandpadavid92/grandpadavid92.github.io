@@ -36,11 +36,6 @@
   }).filter(Boolean);
 
   if ("IntersectionObserver" in window && sections.length) {
-    // Trigger off a thin band across the viewport (from just below the
-    // header to just past the vertical middle) rather than a percentage of
-    // each section's own height -- otherwise sections taller than the
-    // viewport (Mission, Off the Clock) never cross an area threshold and
-    // get skipped.
     var navObserver = new IntersectionObserver(
       function (entries) {
         entries.forEach(function (entry) {
